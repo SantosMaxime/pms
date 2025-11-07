@@ -27,7 +27,12 @@ nsis:
   uninstallerSidebar: null
   include: build/installer.nsh
 mac:
+  icon: resources/pms_512x_icon.icns
   entitlementsInherit: build/entitlements.mac.plist
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -35,7 +40,21 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: PMS-${version}.${ext}
+  title: ${productName} ${version}
+  icon: resources/pms_512x_icon.icns
+  background: null
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 144
+      y: 150
+      type: file
+    - x: 396
+      y: 150
+      type: link
+      path: /Applications
 linux:
   target:
     - AppImage

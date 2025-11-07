@@ -52,7 +52,16 @@ function createWindow(): void {
 // Function to create system tray
 function createTray(): void {
   const trayIcon = nativeImage.createFromPath(icon)
-  tray = new Tray(trayIcon.resize({ width: 16, height: 16 }))
+  
+  // Resize icon based on platform
+  const iconSize = process.platform === 'darwin' ? { width: 22, height: 22 } : { width: 16, height: 16 }
+  tray = new Tray(trayIcon.resize(iconSize))
+  
+  // On macOS, set template mode for better appearance in dark/light mode
+  if (process.platform === 'darwin') {
+    tray.setImage(trayIcon.resize(iconSize))
+  }
+  
   tray.setToolTip('Project Management System')
 
   // Set initial context menu

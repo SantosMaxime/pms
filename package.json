@@ -1,7 +1,7 @@
 {
   "name": "pms",
   "version": "1.0.0",
-  "description": "An Project Manager with React and TypeScript can be call PMS for Project Manager S(antos) :)",
+  "description": "A cross-platform Project Management System with React and TypeScript originally called 'PMS' for Project Manager Santos. :)",
   "main": "./out/main/index.js",
   "author": "Santos Maxime",
   "license": "MIT",

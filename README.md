@@ -3,7 +3,7 @@
 A modern, beautiful project management application built with Electron, React, and TypeScript.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue.svg)
 
 ## ✨ Features
 
@@ -19,9 +19,15 @@ A modern, beautiful project management application built with Electron, React, a
 
 ## 📦 Installation
 
+### Windows
 1. Download `PMS-Setup.exe` from [Releases](https://github.com/SantosMaxime/pms/releases)
 2. Run the installer
 3. Launch PMS from your Start Menu or desktop shortcut
+
+### macOS
+1. Download `PMS-[version].dmg` from [Releases](https://github.com/SantosMaxime/pms/releases)
+2. Open the DMG and drag PMS to your Applications folder
+3. Launch PMS from Applications or Spotlight
 
 ## 🖥️ Screenshots
 

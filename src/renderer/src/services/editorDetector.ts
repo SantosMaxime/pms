@@ -7,6 +7,16 @@ export type EditorStatus = {
 }
 
 /**
+ * Detect the current platform
+ */
+function getPlatform(): 'windows' | 'mac' | 'linux' {
+  const platform = navigator.platform.toLowerCase()
+  if (platform.includes('win')) return 'windows'
+  if (platform.includes('mac')) return 'mac'
+  return 'linux'
+}
+
+/**
  * Detect installed editors by checking common installation paths
  * Returns status for each editor
  */
@@ -17,15 +27,32 @@ export async function detectEditors(): Promise<EditorStatus[]> {
 }
 
 async function detectVSCode(): Promise<EditorStatus> {
-  // Use direct paths - they'll be expanded by IPC or checked as-is
-  const userProfile = await getUserProfilePath()
-  const programFiles = await getProgramFilesPath()
+  const platform = getPlatform()
+  let paths: string[] = []
 
-  const paths = [
-    `${userProfile}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe`,
-    `${programFiles}\\Microsoft VS Code\\Code.exe`,
-    `${programFiles.replace('Program Files', 'Program Files (x86)')}\\Microsoft VS Code\\Code.exe`
-  ]
+  if (platform === 'windows') {
+    const userProfile = await getUserProfilePath()
+    const programFiles = await getProgramFilesPath()
+
+    paths = [
+      `${userProfile}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe`,
+      `${programFiles}\\Microsoft VS Code\\Code.exe`,
+      `${programFiles.replace('Program Files', 'Program Files (x86)')}\\Microsoft VS Code\\Code.exe`
+    ]
+  } else if (platform === 'mac') {
+    paths = [
+      '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code',
+      `${await getHomeDir()}/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code`
+    ]
+  } else {
+    // Linux
+    paths = [
+      '/usr/bin/code',
+      '/usr/local/bin/code',
+      '/snap/bin/code',
+      `${await getHomeDir()}/.local/bin/code`
+    ]
+  }
 
   const foundPath = await checkPaths(paths)
 
@@ -37,9 +64,25 @@ async function detectVSCode(): Promise<EditorStatus> {
 }
 
 async function detectCursor(): Promise<EditorStatus> {
-  const userProfile = await getUserProfilePath()
+  const platform = getPlatform()
+  let paths: string[] = []
 
-  const paths = [`${userProfile}\\AppData\\Local\\Programs\\Cursor\\Cursor.exe`]
+  if (platform === 'windows') {
+    const userProfile = await getUserProfilePath()
+    paths = [`${userProfile}\\AppData\\Local\\Programs\\Cursor\\Cursor.exe`]
+  } else if (platform === 'mac') {
+    paths = [
+      '/Applications/Cursor.app/Contents/MacOS/Cursor',
+      `${await getHomeDir()}/Applications/Cursor.app/Contents/MacOS/Cursor`
+    ]
+  } else {
+    // Linux
+    paths = [
+      '/usr/bin/cursor',
+      '/usr/local/bin/cursor',
+      `${await getHomeDir()}/.local/bin/cursor`
+    ]
+  }
 
   const foundPath = await checkPaths(paths)
 
@@ -51,17 +94,44 @@ async function detectCursor(): Promise<EditorStatus> {
 }
 
 async function detectWebStorm(): Promise<EditorStatus> {
-  const userProfile = await getUserProfilePath()
-  const programFiles = await getProgramFilesPath()
+  const platform = getPlatform()
+  let paths: string[] = []
 
-  const paths = [
-    `${userProfile}\\AppData\\Local\\JetBrains\\Toolbox\\apps\\WebStorm`,
-    `${programFiles}\\JetBrains\\WebStorm`,
-    `${programFiles.replace('Program Files', 'Program Files (x86)')}\\JetBrains\\WebStorm`
-  ]
+  if (platform === 'windows') {
+    const userProfile = await getUserProfilePath()
+    const programFiles = await getProgramFilesPath()
 
-  // WebStorm can be in versioned folders, so we need special handling
-  const foundPath = await checkWebStormPaths(paths)
+    paths = [
+      `${userProfile}\\AppData\\Local\\JetBrains\\Toolbox\\apps\\WebStorm`,
+      `${programFiles}\\JetBrains\\WebStorm`,
+      `${programFiles.replace('Program Files', 'Program Files (x86)')}\\JetBrains\\WebStorm`
+    ]
+
+    // WebStorm can be in versioned folders, so we need special handling
+    const foundPath = await checkWebStormPaths(paths)
+
+    return {
+      app: 'webstorm',
+      found: foundPath !== null,
+      path: foundPath
+    }
+  } else if (platform === 'mac') {
+    paths = [
+      '/Applications/WebStorm.app/Contents/MacOS/webstorm',
+      `${await getHomeDir()}/Applications/WebStorm.app/Contents/MacOS/webstorm`,
+      `${await getHomeDir()}/Library/Application Support/JetBrains/Toolbox/apps/WebStorm`
+    ]
+  } else {
+    // Linux
+    paths = [
+      '/usr/bin/webstorm',
+      '/usr/local/bin/webstorm',
+      `${await getHomeDir()}/.local/bin/webstorm`,
+      `${await getHomeDir()}/.local/share/JetBrains/Toolbox/apps/WebStorm`
+    ]
+  }
+
+  const foundPath = await checkPaths(paths)
 
   return {
     app: 'webstorm',
@@ -71,7 +141,7 @@ async function detectWebStorm(): Promise<EditorStatus> {
 }
 
 /**
- * Get user profile path using IPC or fallback to common default
+ * Get user profile path using IPC or fallback to common default (Windows)
  */
 async function getUserProfilePath(): Promise<string> {
   const expanded = await expandEnvVars('%USERPROFILE%')
@@ -82,7 +152,22 @@ async function getUserProfilePath(): Promise<string> {
 }
 
 /**
- * Get Program Files path using IPC or fallback
+ * Get home directory path (macOS/Linux)
+ */
+async function getHomeDir(): Promise<string> {
+  const platform = getPlatform()
+  
+  if (platform === 'windows') {
+    return await getUserProfilePath()
+  }
+  
+  // For macOS/Linux, try to expand $HOME
+  const expanded = await expandEnvVars('$HOME')
+  return expanded.includes('$') ? (platform === 'mac' ? '/Users' : '/home') : expanded
+}
+
+/**
+ * Get Program Files path using IPC or fallback (Windows)
  */
 async function getProgramFilesPath(): Promise<string> {
   const expanded = await expandEnvVars('%ProgramFiles%')

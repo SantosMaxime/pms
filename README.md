@@ -20,11 +20,13 @@ A modern, beautiful project management application built with Electron, React, a
 ## 📦 Installation
 
 ### Windows
+
 1. Download `PMS-Setup.exe` from [Releases](https://github.com/SantosMaxime/pms/releases)
 2. Run the installer
 3. Launch PMS from your Start Menu or desktop shortcut
 
 ### macOS
+
 1. Download `PMS-[version].dmg` from [Releases](https://github.com/SantosMaxime/pms/releases)
 2. Open the DMG and drag PMS to your Applications folder
 3. Launch PMS from Applications or Spotlight
@@ -36,7 +38,8 @@ A modern, beautiful project management application built with Electron, React, a
 ## 🛠️ Development
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or pnpm
 
 ### Recommended IDE Setup
@@ -63,6 +66,7 @@ $ npm run build:linux
 ```
 
 ### Project Structure
+
 ```
 pms/
 ├── src/

@@ -29,9 +29,16 @@ function createWindow(): void {
 
   // Minimize to tray instead of closing
   mainWindow.on('close', (event) => {
+    // On macOS, if user clicks red X on dock, hide the window (standard macOS behavior)
+    // On Windows/Linux, only hide if not explicitly quitting
     if (!isQuitting) {
       event.preventDefault()
       mainWindow?.hide()
+
+      // On macOS, if no windows are visible, user expects clicking dock icon to show window
+      if (process.platform === 'darwin') {
+        app.dock?.hide()
+      }
     }
   })
 
@@ -52,16 +59,17 @@ function createWindow(): void {
 // Function to create system tray
 function createTray(): void {
   const trayIcon = nativeImage.createFromPath(icon)
-  
+
   // Resize icon based on platform
-  const iconSize = process.platform === 'darwin' ? { width: 22, height: 22 } : { width: 16, height: 16 }
+  const iconSize =
+    process.platform === 'darwin' ? { width: 22, height: 22 } : { width: 16, height: 16 }
   tray = new Tray(trayIcon.resize(iconSize))
-  
+
   // On macOS, set template mode for better appearance in dark/light mode
   if (process.platform === 'darwin') {
     tray.setImage(trayIcon.resize(iconSize))
   }
-  
+
   tray.setToolTip('Project Management System')
 
   // Set initial context menu
@@ -69,11 +77,15 @@ function createTray(): void {
 
   tray.on('click', () => {
     if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.hide()
-      } else {
-        mainWindow.show()
-        mainWindow.focus()
+      // On macOS, tray click should only show context menu, not toggle window
+      // On Windows/Linux, clicking tray icon toggles window visibility
+      if (process.platform !== 'darwin') {
+        if (mainWindow.isVisible()) {
+          mainWindow.hide()
+        } else {
+          mainWindow.show()
+          mainWindow.focus()
+        }
       }
     }
   })
@@ -107,11 +119,44 @@ function updateTrayMenu(
       menuItems.push({
         label: project.name,
         click: async () => {
-          if (project.editor && existsSync(project.editor) && existsSync(project.path)) {
-            spawn(project.editor, [project.path], {
+          try {
+            // Check if editor exists
+            if (!project.editor || !existsSync(project.editor)) {
+              dialog.showErrorBox(
+                'Editor Not Found',
+                `The editor for this project could not be found.\n\nEditor path: ${project.editor || 'Not configured'}\n\nPlease configure a valid editor in the app settings.`
+              )
+              return
+            }
+
+            // Check if project path exists
+            if (!existsSync(project.path)) {
+              dialog.showErrorBox(
+                'Project Not Found',
+                `The project directory could not be found.\n\nProject path: ${project.path}\n\nThe project may have been moved or deleted.`
+              )
+              return
+            }
+
+            // Try to launch the editor
+            const child = spawn(project.editor, [project.path], {
               detached: true,
               stdio: 'ignore'
-            }).unref()
+            })
+
+            child.on('error', (error) => {
+              dialog.showErrorBox(
+                'Failed to Launch Editor',
+                `Could not open the project with the configured editor.\n\nEditor: ${project.editor}\nProject: ${project.path}\n\nError: ${error.message}`
+              )
+            })
+
+            child.unref()
+          } catch (error) {
+            dialog.showErrorBox(
+              'Unexpected Error',
+              `An unexpected error occurred while trying to open the project.\n\nError: ${error instanceof Error ? error.message : String(error)}`
+            )
           }
         }
       })
@@ -166,6 +211,11 @@ ipcMain.handle('app:getLaunchAtStartup', async () => {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+
+  // Handle app quit events (Cmd+Q, right-click Quit on dock, etc.)
+  app.on('before-quit', () => {
+    isQuitting = true
+  })
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -331,7 +381,16 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    } else {
+      // If window exists but is hidden, show it when dock icon is clicked
+      if (mainWindow && !mainWindow.isVisible()) {
+        mainWindow.show()
+        mainWindow.focus()
+        app.dock?.show()
+      }
+    }
   })
 })
 

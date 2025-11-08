@@ -253,7 +253,9 @@ function App(): React.JSX.Element {
                   fontSize: '13px'
                 }}
               >
-                C:\Users\Your Name\Documents\GitHub
+                {navigator.platform.toLowerCase().includes('mac')
+                  ? '/Users/YourName/Documents/GitHub'
+                  : 'C:\\Users\\Your Name\\Documents\\GitHub'}
               </code>
             </p>
             <button

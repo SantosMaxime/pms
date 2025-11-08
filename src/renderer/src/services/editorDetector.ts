@@ -77,11 +77,7 @@ async function detectCursor(): Promise<EditorStatus> {
     ]
   } else {
     // Linux
-    paths = [
-      '/usr/bin/cursor',
-      '/usr/local/bin/cursor',
-      `${await getHomeDir()}/.local/bin/cursor`
-    ]
+    paths = ['/usr/bin/cursor', '/usr/local/bin/cursor', `${await getHomeDir()}/.local/bin/cursor`]
   }
 
   const foundPath = await checkPaths(paths)
@@ -156,11 +152,11 @@ async function getUserProfilePath(): Promise<string> {
  */
 async function getHomeDir(): Promise<string> {
   const platform = getPlatform()
-  
+
   if (platform === 'windows') {
     return await getUserProfilePath()
   }
-  
+
   // For macOS/Linux, try to expand $HOME
   const expanded = await expandEnvVars('$HOME')
   return expanded.includes('$') ? (platform === 'mac' ? '/Users' : '/home') : expanded

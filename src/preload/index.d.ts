@@ -1,5 +1,15 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
+// Keep in sync with src/main/updater.ts
+export type UpdateStatus =
+  | { state: 'idle' }
+  | { state: 'checking' }
+  | { state: 'up-to-date' }
+  | { state: 'downloading'; version: string; percent: number }
+  | { state: 'ready'; version: string }
+  | { state: 'error'; message: string }
+  | { state: 'unsupported' }
+
 export interface API {
   fs: {
     scanDirectory: (dirPath: string) => Promise<{
@@ -43,7 +53,15 @@ export interface API {
       success: boolean
     }>
   }
+  updater: {
+    getStatus: () => Promise<UpdateStatus>
+    check: () => Promise<UpdateStatus>
+    install: () => Promise<void>
+    /** Subscribe to status changes; returns an unsubscribe function */
+    onStatus: (callback: (status: UpdateStatus) => void) => () => void
+  }
   app: {
+    getVersion: () => Promise<string>
     setLaunchAtStartup: (enable: boolean) => Promise<{ success: boolean; error?: string }>
     getLaunchAtStartup: () => Promise<{ success: boolean; enabled: boolean; error?: string }>
   }

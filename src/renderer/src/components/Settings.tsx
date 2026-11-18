@@ -8,6 +8,7 @@ import {
   saveSettings
 } from '../stores/settingsStore'
 import { detectEditors, type EditorStatus } from '../services/editorDetector'
+import { useUpdateStatus, describeUpdateStatus } from '../hooks/useUpdateStatus'
 
 type Props = {
   searchPaths: SearchPath[]
@@ -20,6 +21,8 @@ function Settings({ searchPaths, onUpdate }: Props): React.JSX.Element {
   const [customPaths, setCustomPaths] = useState<EditorPaths>({})
   const [showEditorSection, setShowEditorSection] = useState(false)
   const [launchAtStartup, setLaunchAtStartup] = useState(false)
+  const [version, setVersion] = useState('')
+  const updateStatus = useUpdateStatus()
 
   useEffect(() => {
     detectEditors().then(setEditors)
@@ -27,6 +30,7 @@ function Settings({ searchPaths, onUpdate }: Props): React.JSX.Element {
     if (settings.editorPaths) {
       setCustomPaths(settings.editorPaths)
     }
+    window.api.app.getVersion().then(setVersion)
     // Get launch at startup status
     window.api.app.getLaunchAtStartup().then((result) => {
       if (result.success) {
@@ -278,6 +282,42 @@ function Settings({ searchPaths, onUpdate }: Props): React.JSX.Element {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          marginTop: '32px',
+          paddingTop: '24px',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px'
+        }}
+      >
+        <div>
+          <h2 className="settings-title" style={{ margin: 0 }}>
+            Updates
+          </h2>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '6px' }}>
+            {version && `Version ${version}. `}
+            {describeUpdateStatus(updateStatus)}
+          </div>
+        </div>
+        {updateStatus.state === 'ready' ? (
+          <button className="settings-btn" onClick={() => window.api.updater.install()}>
+            Restart to update
+          </button>
+        ) : (
+          <button
+            className="settings-btn secondary"
+            onClick={() => window.api.updater.check()}
+            disabled={['checking', 'downloading', 'unsupported'].includes(updateStatus.state)}
+            style={{ fontSize: '12px', padding: '6px 12px', whiteSpace: 'nowrap' }}
+          >
+            Check for updates
+          </button>
         )}
       </div>
     </div>

@@ -1,0 +1,61 @@
+name: Release
+
+# Push a tag like v1.1.0 (matching package.json "version") to build the
+# Windows installer and publish it as a GitHub Release. The release also gets
+# latest.yml, which the in-app updater reads to find new versions.
+# Pull requests and manual runs only build the installer, without publishing.
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          PKG="v$(node -p "require('./package.json').version")"
+          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG"
+            exit 1
+          fi
+
+      - run: npm run build
+
+      - name: Build installer and publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build installer only
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        run: npx electron-builder --win --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pms-windows
+          path: |
+            dist/*.exe
+            dist/latest.yml
+          if-no-files-found: error

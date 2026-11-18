@@ -4,10 +4,12 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/pms_512x_icon.png?asset'
 import { readdirSync, statSync, existsSync, readFileSync } from 'fs'
 import { spawn } from 'child_process'
+import { setupUpdater, getUpdateStatus, checkForUpdates, installUpdate } from './updater'
 
 let tray: Tray | null = null
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
+let lastRecentProjects: Array<{ name: string; path: string; editor?: string }> = []
 
 function createWindow(): void {
   // Create the browser window.
@@ -75,6 +77,7 @@ function updateTrayMenu(
   recentProjects: Array<{ name: string; path: string; editor?: string }>
 ): void {
   if (!tray) return
+  lastRecentProjects = recentProjects
 
   const menuItems: Electron.MenuItemConstructorOptions[] = [
     {
@@ -111,6 +114,23 @@ function updateTrayMenu(
     menuItems.push({ type: 'separator' })
   }
 
+  const update = getUpdateStatus()
+  if (update.state === 'ready') {
+    menuItems.push({
+      label: `Restart to update to v${update.version}`,
+      click: () => installUpdate(() => (isQuitting = true))
+    })
+  } else if (update.state === 'downloading') {
+    menuItems.push({ label: `Downloading update… ${update.percent}%`, enabled: false })
+  } else if (update.state !== 'unsupported') {
+    menuItems.push({
+      label: update.state === 'checking' ? 'Checking for updates…' : 'Check for updates',
+      enabled: update.state !== 'checking',
+      click: () => checkForUpdates()
+    })
+  }
+  menuItems.push({ type: 'separator' })
+
   menuItems.push({
     label: 'Quit',
     click: () => {
@@ -141,6 +161,8 @@ ipcMain.handle('app:setLaunchAtStartup', async (_, enable: boolean) => {
     return { success: false, error: String(error) }
   }
 })
+
+ipcMain.handle('app:getVersion', () => app.getVersion())
 
 ipcMain.handle('app:getLaunchAtStartup', async () => {
   try {
@@ -319,6 +341,14 @@ app.whenReady().then(() => {
 
   createTray()
 
+  setupUpdater({
+    getWindow: () => mainWindow,
+    onStatusChange: () => updateTrayMenu(lastRecentProjects),
+    beforeInstall: () => {
+      isQuitting = true
+    }
+  })
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -329,6 +359,12 @@ app.whenReady().then(() => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
+// Any real quit (tray "Quit", installer restart, Windows shutdown) must
+// let the window close instead of hiding it in the tray.
+app.on('before-quit', () => {
+  isQuitting = true
+})
+
 app.on('window-all-closed', () => {
   // Don't quit the app, keep it running in the tray
   // User must explicitly click "Quit" from tray menu

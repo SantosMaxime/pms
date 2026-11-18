@@ -4,6 +4,7 @@ import SearchBar from './components/SearchBar'
 import RecentProject, { type EditorApp } from './components/RecentProject'
 import Settings from './components/Settings'
 import ProjectSettings from './components/ProjectSettings'
+import UpdateBanner from './components/UpdateBanner'
 import { loadSettings, setProjectEditor } from './stores/settingsStore'
 import { scanAllPaths } from './services/projectScanner'
 import { launchProject } from './services/editorDetector'
@@ -367,6 +368,8 @@ function App(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      <UpdateBanner />
 
       {showVersions && <Versions className={versionsHiding ? 'hide' : ''} />}
     </div>

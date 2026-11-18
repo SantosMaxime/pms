@@ -19,7 +19,11 @@ export type EditorPaths = {
   webstorm?: string
 }
 
+export type EditorApp = 'vscode' | 'cursor' | 'webstorm'
+
 export type Settings = {
   searchPaths: SearchPath[]
   editorPaths?: EditorPaths
+  /** Default editor per project, keyed by project path */
+  projectEditors?: Record<string, EditorApp>
 }

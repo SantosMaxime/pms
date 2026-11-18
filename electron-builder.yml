@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.santosmaxime.pms
 productName: pms
 directories:
   buildResources: build
@@ -42,11 +42,8 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: Santos Maxime
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

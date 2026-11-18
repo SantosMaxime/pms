@@ -37,7 +37,7 @@
 - **Instant search.** Filter as you type by name, path or framework. Search covers every project, not only recent ones.
 - **Framework badges.** React, Next.js, Vue, Svelte, Angular, Electron, Express and more are read from each project's `package.json`.
 - **Open in your editor.** VS Code, Cursor and WebStorm are detected automatically. Click a card, or pick an editor from its menu.
-- **Default editor per project.** Choose which editor a card opens with.
+- **Default editor per project.** Choose which editor a card opens with. PMS remembers it between sessions.
 - **Always at hand.** Closing the window keeps PMS in the system tray, with your 4 most recent projects one click away. It can also start with Windows.
 
 ---

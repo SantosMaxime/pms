@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { UpdateStatus } from '../main/updater'
 
 // Custom APIs for renderer
 const api = {
@@ -53,7 +54,18 @@ const api = {
       success: boolean
     }> => ipcRenderer.invoke('tray:updateMenu', recentProjects)
   },
+  updater: {
+    getStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke('updater:getStatus'),
+    check: (): Promise<UpdateStatus> => ipcRenderer.invoke('updater:check'),
+    install: (): Promise<void> => ipcRenderer.invoke('updater:install'),
+    onStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+      const listener = (_: unknown, status: UpdateStatus): void => callback(status)
+      ipcRenderer.on('updater:status', listener)
+      return () => ipcRenderer.removeListener('updater:status', listener)
+    }
+  },
   app: {
+    getVersion: (): Promise<string> => ipcRenderer.invoke('app:getVersion'),
     setLaunchAtStartup: (enable: boolean): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('app:setLaunchAtStartup', enable),
     getLaunchAtStartup: (): Promise<{ success: boolean; enabled: boolean; error?: string }> =>

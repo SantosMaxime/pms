@@ -1203,3 +1203,58 @@ code {
     0 4px 12px rgba(99, 102, 241, 0.3),
     0 2px 6px rgba(168, 85, 247, 0.2);
 }
+
+/* Update banner */
+.update-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 12px;
+  background: rgba(24, 24, 27, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  white-space: nowrap;
+  animation: updateBannerIn 0.3s ease-out;
+}
+
+.update-banner b {
+  color: #fff;
+}
+
+.update-banner .settings-btn {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.update-banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+}
+
+@keyframes updateBannerIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.settings-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

@@ -39,6 +39,7 @@
 - **Open in your editor.** VS Code, Cursor and WebStorm are detected automatically. Click a card, or pick an editor from its menu.
 - **Default editor per project.** Choose which editor a card opens with. PMS remembers it between sessions.
 - **Always at hand.** Closing the window keeps PMS in the system tray, with your 4 most recent projects one click away. It can also start with Windows.
+- **Updates itself.** New versions download in the background. Restart when you're ready, from the app or the tray.
 
 ---
 
@@ -80,14 +81,30 @@ npm run build:win    # build the Windows installer (dist/PMS-Setup.exe)
 </details>
 
 <details>
+<summary><b>Releasing a new version</b></summary>
+
+1. Bump `version` in `package.json` (for example `1.2.0`) and merge it into `main`.
+2. Push a matching tag:
+
+   ```bash
+   git tag v1.2.0
+   git push origin v1.2.0
+   ```
+
+3. The **Release** workflow builds the Windows installer and publishes it as a GitHub Release, along with `latest.yml`. Installed copies of PMS find it within a few hours, or right away with **Settings → Check for updates**.
+
+</details>
+
+<details>
 <summary><b>Project structure</b></summary>
 
 ```
 pms/
 ├── src/
-│   ├── main/          # Electron main process: file system, tray, editor launch
+│   ├── main/          # Electron main process: file system, tray, editor launch, updater
 │   ├── preload/       # Typed bridge exposed to the renderer as window.api
 │   └── renderer/      # React UI (search, project cards, settings)
+├── .github/workflows/ # Builds and publishes the Windows installer
 ├── build/             # Installer resources (icons, NSIS script)
 ├── resources/         # App icons
 ├── scripts/demo/      # Records docs/demo.gif

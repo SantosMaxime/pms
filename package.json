@@ -1,7 +1,7 @@
 {
   "name": "pms",
   "version": "1.0.0",
-  "description": "An Project Manager with React and TypeScript can be call PMS for Project Manager S(antos) :)",
+  "description": "Find your recent projects and open them in VS Code, Cursor or WebStorm in one click.",
   "main": "./out/main/index.js",
   "author": "Santos Maxime",
   "license": "MIT",

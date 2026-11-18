@@ -4,7 +4,7 @@ import SearchBar from './components/SearchBar'
 import RecentProject, { type EditorApp } from './components/RecentProject'
 import Settings from './components/Settings'
 import ProjectSettings from './components/ProjectSettings'
-import { loadSettings } from './stores/settingsStore'
+import { loadSettings, setProjectEditor } from './stores/settingsStore'
 import { scanAllPaths } from './services/projectScanner'
 import { launchProject } from './services/editorDetector'
 import type { ProjectInfo } from './types/project'
@@ -16,19 +16,23 @@ function App(): React.JSX.Element {
   const [settings, setSettings] = useState(loadSettings())
   const [isScanning, setIsScanning] = useState(false)
   const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null)
-  const [projectDefaults, setProjectDefaults] = useState<Record<string, EditorApp>>({})
+  const [projectDefaults, setProjectDefaults] = useState<Record<string, EditorApp>>(
+    () => loadSettings().projectEditors ?? {}
+  )
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [showVersions, setShowVersions] = useState(true)
   const [versionsHiding, setVersionsHiding] = useState(false)
   const projectsPerPage = 6
 
-  function getProjectDefaultApp(projectId: string): EditorApp {
-    return projectDefaults[projectId] || 'vscode'
+  // Keyed by project path: project ids are regenerated on every scan.
+  function getProjectDefaultApp(projectPath: string): EditorApp {
+    return projectDefaults[projectPath] || 'vscode'
   }
 
-  function handleSaveProjectSettings(projectId: string, app: EditorApp): void {
-    setProjectDefaults((prev) => ({ ...prev, [projectId]: app }))
+  function handleSaveProjectSettings(projectPath: string, app: EditorApp): void {
+    setProjectDefaults((prev) => ({ ...prev, [projectPath]: app }))
+    setProjectEditor(projectPath, app)
   }
 
   // Calculate pagination
@@ -118,7 +122,7 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const updateTrayMenu = async (): Promise<void> => {
       const recentProjects = projects.slice(0, 4).map((project) => {
-        const defaultApp = getProjectDefaultApp(project.id)
+        const defaultApp = getProjectDefaultApp(project.path)
         const editorPath = project.availableEditors?.[defaultApp]
         return {
           name: project.name,
@@ -290,7 +294,7 @@ function App(): React.JSX.Element {
                 path={project.path}
                 frameworks={project.frameworks}
                 size="medium"
-                defaultApp={getProjectDefaultApp(project.id)}
+                defaultApp={getProjectDefaultApp(project.path)}
                 onOpen={async (app: EditorApp) => {
                   const customPath = settings.editorPaths?.[app]
                   const result = await launchProject(project.path, app, customPath)
@@ -355,8 +359,8 @@ function App(): React.JSX.Element {
             <div onClick={(e) => e.stopPropagation()}>
               <ProjectSettings
                 projectName={selectedProject.name}
-                defaultApp={getProjectDefaultApp(selectedProject.id)}
-                onSave={(app) => handleSaveProjectSettings(selectedProject.id, app)}
+                defaultApp={getProjectDefaultApp(selectedProject.path)}
+                onSave={(app) => handleSaveProjectSettings(selectedProject.path, app)}
                 onClose={() => setSelectedProject(null)}
               />
             </div>

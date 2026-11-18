@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { FrameworkIcon } from './FrameworkIcon'
 
-export type EditorApp = 'vscode' | 'cursor' | 'webstorm'
+import type { EditorApp } from '../types/project'
+
+export type { EditorApp }
 
 type Props = {
   name: string

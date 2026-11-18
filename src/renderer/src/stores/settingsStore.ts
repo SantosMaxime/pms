@@ -1,10 +1,9 @@
-import type { Settings, SearchPath } from '../types/project'
+import type { Settings, SearchPath, EditorApp } from '../types/project'
 
 const STORAGE_KEY = 'pms-settings'
 
-const defaultSettings: Settings = {
-  searchPaths: [],
-  editorPaths: {}
+function defaultSettings(): Settings {
+  return { searchPaths: [], editorPaths: {}, projectEditors: {} }
 }
 
 export function loadSettings(): Settings {
@@ -15,13 +14,14 @@ export function loadSettings(): Settings {
       // Ensure editorPaths exists
       return {
         ...parsed,
-        editorPaths: parsed.editorPaths || {}
+        editorPaths: parsed.editorPaths || {},
+        projectEditors: parsed.projectEditors || {}
       }
     }
   } catch (error) {
     console.error('Failed to load settings:', error)
   }
-  return defaultSettings
+  return defaultSettings()
 }
 
 export function saveSettings(settings: Settings): void {
@@ -58,5 +58,12 @@ export function toggleSearchPath(id: string): Settings {
     path.enabled = !path.enabled
     saveSettings(settings)
   }
+  return settings
+}
+
+export function setProjectEditor(projectPath: string, app: EditorApp): Settings {
+  const settings = loadSettings()
+  settings.projectEditors = { ...settings.projectEditors, [projectPath]: app }
+  saveSettings(settings)
   return settings
 }

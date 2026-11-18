@@ -91,6 +91,8 @@ npm run build:win    # build the Windows installer (dist/PMS-Setup.exe)
    git push origin v1.2.0
    ```
 
+   Or run **Actions → Release → Run workflow** on `main` with **publish** ticked, which creates the tag for you.
+
 3. The **Release** workflow builds the Windows installer and publishes it as a GitHub Release, along with `latest.yml`. Installed copies of PMS find it within a few hours, or right away with **Settings → Check for updates**.
 
 </details>

@@ -1,92 +1,120 @@
-# PMS - Project Management System
+<p align="center">
+  <img src="resources/pms_512x_icon.png" alt="PMS icon" width="96"/>
+</p>
 
-A modern, beautiful project management application built with Electron, React, and TypeScript.
+<h1 align="center">PMS · Project Manager S</h1>
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)
+<p align="center">
+  <b>Jump back into any project without digging through folders.</b><br/>
+  A small Windows app that finds the projects you worked on recently and opens them in VS Code, Cursor or WebStorm in one click.
+</p>
 
-## ✨ Features
+<p align="center">
+  <a href="https://github.com/SantosMaxime/pms/releases/latest"><img src="https://img.shields.io/github/v/release/SantosMaxime/pms?style=flat-square&color=e5484d" alt="Latest release"/></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078d4?style=flat-square&logo=windows&logoColor=white" alt="Windows"/>
+  <img src="https://img.shields.io/badge/Electron-38-47848f?style=flat-square&logo=electron&logoColor=white" alt="Electron"/>
+  <img src="https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=black" alt="React"/>
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="MIT License"/></a>
+</p>
 
-- 🔍 **Smart Project Detection** - Automatically scans and discovers projects from configured paths
-- 🎨 **Beautiful Glass-Morphism UI** - Modern Figma-inspired design with smooth animations
-- 🚀 **Multi-Editor Support** - Launch projects in VS Code, Cursor, or other editors
-- 📊 **Project Insights** - View frameworks, dependencies, and last modified dates
-- 🔎 **Powerful Search** - Instantly find projects by name, path, or framework
-- 📄 **Pagination** - Clean navigation through large project collections
-- 💾 **System Tray Integration** - Quick access to recent projects from the tray
-- ⚙️ **Customizable Settings** - Configure search paths and default editors
-- 🚀 **Launch at Startup** - Optional auto-start on Windows login
+<p align="center">
+  <img src="docs/demo.gif" alt="Demo: PMS lists recent projects, filters them while typing, opens one in Cursor, sets a default editor and shows the settings" width="800"/>
+</p>
 
-## 📦 Installation
-
-1. Download `PMS-Setup.exe` from [Releases](https://github.com/SantosMaxime/pms/releases)
-2. Run the installer
-3. Launch PMS from your Start Menu or desktop shortcut
-
-## 🖥️ Screenshots
-
-![PMS Screenshot](resources/pms_screenshot1.png)
-
-## 🛠️ Development
-
-### Prerequisites
-- Node.js 18+ 
-- npm or pnpm
-
-### Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-
-### Project Setup
-
-```bash
-# Install dependencies
-$ npm install
-
-# Run in development mode
-$ npm run dev
-
-# Build for Windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
-
-### Project Structure
-```
-pms/
-├── src/
-│   ├── main/          # Electron main process
-│   ├── preload/       # Preload scripts
-│   └── renderer/      # React frontend
-├── build/             # Build resources (icons, installer scripts)
-└── resources/         # App resources
-```
-
-## 📝 License
-
-MIT License - Copyright (c) 2025 Santos Maxime
-
-See [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**Santos Maxime**
-
-- GitHub: [@SantosMaxime](https://github.com/SantosMaxime)
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## ⭐ Show Your Support
-
-Give a ⭐️ if this project helped you!
+<p align="center">
+  <a href="https://github.com/SantosMaxime/pms/releases/latest"><b>Download for Windows</b></a> ·
+  <a href="#features">Features</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#development">Development</a>
+</p>
 
 ---
 
-Built with ❤️ using Electron + React + TypeScript
+## Features
+
+- **Recent projects first.** PMS scans the folders you choose and shows the projects you modified in the last 3 weeks, newest first.
+- **Instant search.** Filter as you type by name, path or framework. Search covers every project, not only recent ones.
+- **Framework badges.** React, Next.js, Vue, Svelte, Angular, Electron, Express and more are read from each project's `package.json`.
+- **Open in your editor.** VS Code, Cursor and WebStorm are detected automatically. Click a card, or pick an editor from its menu.
+- **Default editor per project.** Choose which editor a card opens with.
+- **Always at hand.** Closing the window keeps PMS in the system tray, with your 4 most recent projects one click away. It can also start with Windows.
+
+---
+
+## Getting started
+
+1. Download `PMS-Setup.exe` from the [latest release](https://github.com/SantosMaxime/pms/releases/latest) and run it.
+2. Open **Settings** (top right) and add the folders that contain your projects, for example `C:\Users\you\Documents\GitHub`. Each sub-folder is treated as a project.
+3. That's it. Your recent projects appear on the home screen.
+
+If an editor is installed in an unusual location, set its path under **Settings → Editor Paths**.
+
+---
+
+## Development
+
+Requires Node.js 18+.
+
+```bash
+git clone https://github.com/SantosMaxime/pms.git
+cd pms
+npm install
+npm run dev          # run the app with hot reload
+npm run build:win    # build the Windows installer (dist/PMS-Setup.exe)
+```
+
+<details>
+<summary><b>All scripts</b></summary>
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start the app in development mode |
+| `npm run build` | Type-check and bundle main, preload and renderer |
+| `npm run build:win` | Build the Windows NSIS installer |
+| `npm run build:mac` / `build:linux` | Build for macOS / Linux (untested) |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Type-check the Node and web projects |
+| `npm run format` | Format with Prettier |
+
+</details>
+
+<details>
+<summary><b>Project structure</b></summary>
+
+```
+pms/
+├── src/
+│   ├── main/          # Electron main process: file system, tray, editor launch
+│   ├── preload/       # Typed bridge exposed to the renderer as window.api
+│   └── renderer/      # React UI (search, project cards, settings)
+├── build/             # Installer resources (icons, NSIS script)
+├── resources/         # App icons
+├── scripts/demo/      # Records docs/demo.gif
+└── docs/              # README assets
+```
+
+</details>
+
+<details>
+<summary><b>Regenerating the demo GIF</b></summary>
+
+`docs/demo.gif` is recorded from the real React UI, with the Electron API replaced by fictional projects. It requires Playwright (Chromium) and ffmpeg:
+
+```bash
+node scripts/demo/render-demo.mjs
+```
+
+</details>
+
+**Tech stack:** Electron 38, React 19, TypeScript, Vite (electron-vite), electron-builder.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+## License
+
+MIT © Santos Maxime. See [LICENSE](LICENSE).
